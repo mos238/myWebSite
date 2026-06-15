@@ -51,33 +51,33 @@
             transform: translateX(-5px);
         }
         
-        .separator {
-            text-align: center;
-            margin: 40px 0;
-            position: relative;
+        .back-to-portfolio {
+            display: inline-block;
+            margin: 10px 0 20px 0;
+            padding: 8px 16px;
+            background: #48bb78;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
         
-        .separator::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #667eea, transparent);
-        }
-        
-        .separator span {
-            background: white;
-            padding: 0 20px;
-            position: relative;
-            color: #667eea;
-            font-size: 14px;
+        .back-to-portfolio:hover {
+            background: #38a169;
+            transform: translateX(-5px);
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Back to Portfolio Button at Top -->
+        <div style="margin-bottom: 20px;">
+            <a href="https://mos238.github.io/myWebSite/tools.html" class="back-to-portfolio">
+                ← Back to Tools
+            </a>
+        </div>
+        
         <div class="two-columns">
             <!-- MAIN CONTENT -->
             <div class="main-content">
@@ -91,17 +91,20 @@
 
                 <p>Building web applications with modern technologies. Focused on clean code, performance, and great user experiences.</p>
 
-                <h2>Experience</h2>
+                <h2>Featured Project</h2>
                 <div class="project">
-                    <div class="project-title">YouTube Downloader Web App</div>
+                    <div class="project-title">🎥 YouTube Downloader Web App</div>
                     <div class="project-tech">Flask · yt-dlp · Python · HTML/CSS</div>
                     <p style="font-size: 14px;">Full-stack application that lets users download YouTube videos in any quality.</p>
+                    <div style="margin-top: 15px;">
+                        <a href="https://mywebsite-m9qv.onrender.com" target="_blank" style="display: inline-block; padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px;">Launch Web App →</a>
+                    </div>
                 </div>
 
-                <!-- Back to Portfolio button after YouTube Downloader -->
-                <div style="margin: 20px 0;">
+                <!-- Back to Portfolio Button AFTER YouTube Web App Launcher -->
+                <div style="margin: 20px 0 30px 0; text-align: center;">
                     <a href="https://mos238.github.io/myWebSite/tools.html" class="back-button">
-                        ← Back to Developer Tools
+                        ← Browse All Developer Tools
                     </a>
                 </div>
 
@@ -125,7 +128,7 @@
                 </div>
             </div>
 
-            <!-- SIDEBAR - Tools link -->
+            <!-- SIDEBAR -->
             <div class="sidebar">
                 <div class="tools">
                     <h3>🛠️ Developer Tools</h3>
