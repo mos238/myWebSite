@@ -28,6 +28,11 @@
             padding: 8px 16px;
             background: rgba(255,255,255,0.2);
             border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(-5px);
         }
         h1 {
             color: white;
@@ -58,7 +63,7 @@
         .tool-title { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 10px; }
         .tool-description { color: #666; font-size: 14px; margin-bottom: 20px; }
         .tool-downloads { display: flex; gap: 10px; flex-wrap: wrap; }
-        .download-btn, .install-btn {
+        .download-btn {
             display: inline-block;
             padding: 8px 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -66,9 +71,6 @@
             text-decoration: none;
             border-radius: 6px;
             font-size: 13px;
-        }
-        .install-btn {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
         }
         .note {
             text-align: center;
@@ -81,7 +83,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <a href="/" class="back-link">← Back to Portfolio</a>
+            <a href="https://mos238.github.io/myWebSite/" class="back-link">← Back to Portfolio</a>
             <h1>🛠️ Developer Tools</h1>
             <p class="subtitle">Free tools I've built for the developer community</p>
         </div>
@@ -108,7 +110,7 @@
                 <div class="tool-description">Simple, reliable M3U8/HLS stream downloader. Supports Referer URLs.</div>
                 <div class="tool-downloads">
                     <a href="m3u8_downloader.sh" download class="download-btn">Download Script</a>
-                    <a href="install_instructions.html" class="install-btn">📖 Install Instructions</a>
+                    <a href="install_m3u8_app.sh" download class="download-btn">One-Click Installer</a>
                 </div>
             </div>
         </div>
