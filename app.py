@@ -4,6 +4,20 @@ import yt_dlp
 import os
 import uuid
 import re
+import ssl
+import certifi
+
+# Fix SSL certificate issues
+os.environ['SSL_CERT_FILE'] = certifi.where()
+os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
+
+# Create unverified SSL context as fallback
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
 
 app = Flask(__name__)
 CORS(app)
@@ -25,7 +39,7 @@ def clean_youtube_url(url):
     # Handle youtube.com URLs with extra params
     if 'youtube.com' in url or 'youtu.be' in url:
         # Remove tracking parameters
-        url = re.sub(r'[?&](si|feature|list|index|pp|is|emb|utm)[=][^&]*', '', url)
+        url = re.sub(r'[?&](si|feature|list|index|pp|is|emb|utm|ab_channel)[=][^&]*', '', url)
         # Remove trailing '&' or '?'
         url = re.sub(r'[?&]$', '', url)
     
@@ -55,6 +69,9 @@ def get_video_info():
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'cookiefile': None,
             'nocheckcertificate': True,
+            'ignoreerrors': True,
+            'geo_bypass': True,
+            'geo_bypass_country': 'US',
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -81,7 +98,7 @@ def get_video_info():
                 'title': info.get('title', 'Unknown'),
                 'thumbnail': info.get('thumbnail', ''),
                 'duration': info.get('duration', 0),
-                'formats': formats[:10]  # Limit to 10 formats
+                'formats': formats[:10]
             })
             
     except Exception as e:
@@ -89,7 +106,9 @@ def get_video_info():
         print(f"Error: {error_msg}")
         
         # User-friendly error messages
-        if 'Video unavailable' in error_msg:
+        if 'Certificate' in error_msg or 'certificate' in error_msg:
+            error_msg = 'SSL certificate issue. Please try using the local downloader instead.'
+        elif 'Video unavailable' in error_msg:
             error_msg = 'Video is unavailable or private'
         elif 'Sign in' in error_msg:
             error_msg = 'Video requires login or is age-restricted'
@@ -97,8 +116,8 @@ def get_video_info():
             error_msg = 'Rate limited. Please try again later'
         elif '404' in error_msg:
             error_msg = 'Video not found. Check the URL'
-        elif 'HTTP Error 400' in error_msg:
-            error_msg = 'Invalid URL format'
+        elif 'HTTP Error' in error_msg:
+            error_msg = 'Network error. Please try again'
         
         return jsonify({'success': False, 'error': error_msg}), 400
 
@@ -127,6 +146,8 @@ def download_video():
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'cookiefile': None,
             'nocheckcertificate': True,
+            'ignoreerrors': True,
+            'geo_bypass': True,
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
