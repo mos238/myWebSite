@@ -63,20 +63,35 @@
         .tool-title { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 10px; }
         .tool-description { color: #666; font-size: 14px; margin-bottom: 20px; }
         .tool-downloads { display: flex; gap: 10px; flex-wrap: wrap; }
-        .download-btn {
+        .download-btn, .web-btn {
             display: inline-block;
             padding: 8px 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
             border-radius: 6px;
             font-size: 13px;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .web-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
         }
         .note {
             text-align: center;
             color: rgba(255,255,255,0.8);
             margin-top: 50px;
             padding: 20px;
+        }
+        .badge {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-left: 10px;
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -88,14 +103,28 @@
             <p class="subtitle">Free tools I've built for the developer community</p>
         </div>
         <div class="tools-grid">
+            <!-- YouTube Downloader - Web App -->
             <div class="tool-card">
                 <div class="tool-icon">🎥</div>
-                <div class="tool-title">YouTube Downloader</div>
-                <div class="tool-description">Web-based YouTube video downloader. Paste URL, choose quality, download instantly.</div>
+                <div class="tool-title">YouTube Downloader (Web App)</div>
+                <div class="tool-description">Web-based YouTube video downloader. Works on any device, no installation needed.</div>
                 <div class="tool-downloads">
-                    <a href="https://mywebsite-m9qv.onrender.com" target="_blank" class="download-btn">Launch Web App →</a>
+                    <a href="https://mywebsite-m9qv.onrender.com" target="_blank" class="web-btn">Launch Web App →</a>
                 </div>
             </div>
+            
+            <!-- YouTube Downloader - Local Desktop App (NEW - FASTER) -->
+            <div class="tool-card">
+                <div class="tool-icon">💻⚡</div>
+                <div class="tool-title">Local Video Downloader <span class="badge">FASTER</span></div>
+                <div class="tool-description">Desktop app that runs on your PC. Much faster, no server limits, supports MP3 audio extraction.</div>
+                <div class="tool-downloads">
+                    <a href="local_downloader.py" download class="download-btn">Download Python App</a>
+                    <a href="local_downloader.desktop" download class="download-btn">Desktop Launcher</a>
+                </div>
+            </div>
+            
+            <!-- YouTube Downloader - Bash Script -->
             <div class="tool-card">
                 <div class="tool-icon">📜</div>
                 <div class="tool-title">YouTube Downloader Script</div>
@@ -104,18 +133,23 @@
                     <a href="dl_ytube.sh" download class="download-btn">Download Script</a>
                 </div>
             </div>
+            
+            <!-- M3U8 Downloader Suite -->
             <div class="tool-card">
                 <div class="tool-icon">🐧</div>
-                <div class="tool-title">M3U8 Downloader</div>
-                <div class="tool-description">Simple, reliable M3U8/HLS stream downloader. Supports Referer URLs.</div>
+                <div class="tool-title">M3U8 Downloader Suite</div>
+                <div class="tool-description">Download HLS/M3U8 streams. Includes Linux, Windows, and Python versions.</div>
                 <div class="tool-downloads">
-                    <a href="m3u8_downloader.sh" download class="download-btn">Download Script</a>
+                    <a href="m3u8_downloader.sh" download class="download-btn">Linux Script</a>
+                    <a href="m3u8-dl.bat" download class="download-btn">Windows Batch</a>
+                    <a href="m3u8-dl.py" download class="download-btn">Python Script</a>
                     <a href="install_m3u8_app.sh" download class="download-btn">One-Click Installer</a>
                 </div>
             </div>
         </div>
         <div class="note">
-            💡 <strong>Requirements:</strong> ffmpeg is required. Install with: sudo apt install ffmpeg
+            💡 <strong>Pro tip:</strong> The Local Video Downloader is the fastest option as it runs directly on your computer.
+            <br>Web app works on any device but has size limits. All M3U8 tools require ffmpeg (included in the installer).
         </div>
     </div>
 </body>
