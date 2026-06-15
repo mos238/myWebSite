@@ -25,6 +25,40 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(102,126,234,0.1);
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .back-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(-3px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
         }
         
         .tabs {
@@ -64,18 +98,6 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
         }
         
         .url-input {
@@ -155,10 +177,21 @@
             margin-top: 15px;
             display: none;
         }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="https://mos238.github.io/myWebSite/" class="back-link">← Back to Portfolio</a>
+        
         <h1>🎥 Video Downloader</h1>
         <p class="subtitle">Download YouTube videos or M3U8 streams</p>
         
@@ -192,6 +225,10 @@
             </div>
             
             <div class="error" id="m3u8Error"></div>
+        </div>
+        
+        <div class="footer-note">
+            💡 Free tool by Mohammed Sayed | <a href="https://mos238.github.io/myWebSite/" style="color: #667eea;">Visit Portfolio</a>
         </div>
     </div>
     
