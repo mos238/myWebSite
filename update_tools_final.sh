@@ -1,0 +1,126 @@
+#!/bin/bash
+
+cat > tools.html << 'HTML'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Tools - Mohammed Sayed</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+        h1 {
+            color: white;
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+        }
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        .tool-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            transition: transform 0.3s;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .tool-icon { font-size: 48px; margin-bottom: 15px; }
+        .tool-title { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 10px; }
+        .tool-description { color: #666; font-size: 14px; margin-bottom: 20px; }
+        .tool-downloads { display: flex; gap: 10px; flex-wrap: wrap; }
+        .download-btn, .install-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .install-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+        .note {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 50px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-link">← Back to Portfolio</a>
+            <h1>🛠️ Developer Tools</h1>
+            <p class="subtitle">Free tools I've built for the developer community</p>
+        </div>
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="tool-icon">🎥</div>
+                <div class="tool-title">YouTube Downloader</div>
+                <div class="tool-description">Web-based YouTube video downloader. Paste URL, choose quality, download instantly.</div>
+                <div class="tool-downloads">
+                    <a href="https://mywebsite-m9qv.onrender.com" target="_blank" class="download-btn">Launch Web App →</a>
+                </div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">📜</div>
+                <div class="tool-title">YouTube Downloader Script</div>
+                <div class="tool-description">Bash script for terminal lovers. Quick YouTube downloads from command line.</div>
+                <div class="tool-downloads">
+                    <a href="dl_ytube.sh" download class="download-btn">Download Script</a>
+                </div>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">🐧</div>
+                <div class="tool-title">M3U8 Downloader</div>
+                <div class="tool-description">Simple, reliable M3U8/HLS stream downloader. Supports Referer URLs.</div>
+                <div class="tool-downloads">
+                    <a href="m3u8_downloader.sh" download class="download-btn">Download Script</a>
+                    <a href="install_instructions.html" class="install-btn">📖 Install Instructions</a>
+                </div>
+            </div>
+        </div>
+        <div class="note">
+            💡 <strong>Requirements:</strong> ffmpeg is required. Install with: sudo apt install ffmpeg
+        </div>
+    </div>
+</body>
+</html>
+HTML
+
+echo "Tools page updated"

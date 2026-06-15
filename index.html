@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohammed Sayed | Full Stack Developer</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tools-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+        
+        .tools-link:hover {
+            transform: translateX(5px);
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="two-columns">
+            <!-- MAIN CONTENT -->
+            <div class="main-content">
+                <h1>Mohammed Sayed</h1>
+                <div class="title">Full Stack Developer</div>
+                
+                <div class="social-links">
+                    <a href="https://github.com/mos238" target="_blank" class="social-link">🐙 GitHub</a>
+                    <a href="https://www.linkedin.com/in/mohammed-sayed" target="_blank" class="social-link">🔗 LinkedIn</a>
+                </div>
+
+                <p>Building web applications with modern technologies. Focused on clean code, performance, and great user experiences.</p>
+
+                <h2>Experience</h2>
+                <div class="project">
+                    <div class="project-title">YouTube Downloader Web App</div>
+                    <div class="project-tech">Flask · yt-dlp · Python · HTML/CSS</div>
+                    <p style="font-size: 14px;">Full-stack application that lets users download YouTube videos in any quality.</p>
+                </div>
+
+                <div class="project">
+                    <div class="project-title">Portfolio Website</div>
+                    <div class="project-tech">HTML5 · CSS3 · JavaScript · GitHub Pages</div>
+                    <p style="font-size: 14px;">Clean, responsive portfolio showcasing my work and development journey.</p>
+                </div>
+
+                <h2>Technical Skills</h2>
+                <div class="skills">
+                    <span class="skill">JavaScript/TypeScript</span>
+                    <span class="skill">Python</span>
+                    <span class="skill">React</span>
+                    <span class="skill">Node.js</span>
+                    <span class="skill">Flask</span>
+                    <span class="skill">Git/GitHub</span>
+                    <span class="skill">Docker</span>
+                    <span class="skill">PostgreSQL</span>
+                    <span class="skill">REST APIs</span>
+                </div>
+            </div>
+
+            <!-- SIDEBAR - Simple tools link -->
+            <div class="sidebar">
+                <div class="tools">
+                    <h3>🛠️ Developer Tools</h3>
+                    <p style="font-size: 14px; margin-bottom: 15px;">Free tools I've built for downloading videos and streams.</p>
+                    <a href="tools.html" class="tools-link">
+                        Browse All Tools →
+                        <span class="badge">7 tools</span>
+                    </a>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="contact-form">
+                    <h3>📬 Send me a message</h3>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <input type="text" id="name" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" placeholder="Your email" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" placeholder="Your message" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">Send Message</button>
+                        <div id="formStatus" class="form-status"></div>
+                    </form>
+                    <p style="font-size: 11px; color: #888; margin-top: 12px; text-align: center;">
+                        I'll respond within 24-48 hours
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            © 2026 Mohammed Sayed
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Contact form handler
+        const contactForm = document.getElementById('contactForm');
+        const formStatus = document.getElementById('formStatus');
+        
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            
+            const subject = `Portfolio Contact from ${name}`;
+            const body = `Name: ${name}%0AEmail: ${email}%0A%0AMessage:%0A${message}`;
+            const mailtoLink = `mailto:m.omarsayed@gmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+            
+            window.location.href = mailtoLink;
+            showStatus('✓ Opening your email client...', 'success');
+            contactForm.reset();
+        });
+        
+        function showStatus(message, type) {
+            formStatus.textContent = message;
+            formStatus.className = `form-status ${type}`;
+            formStatus.style.display = 'block';
+            setTimeout(() => formStatus.style.display = 'none', 5000);
+        }
+    </script>
+</body>
+</html>
+ 

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=M3U8 Video Downloader
+Comment=Download HLS/M3U8 video streams with GUI
+Exec=/home/zeus/Documents/projects/CodecademyExamPrep/myWebSite/launch_m3u8.sh
+Icon=/home/zeus/Documents/projects/CodecademyExamPrep/myWebSite/m3u8_icon.png
+Terminal=false
+Categories=AudioVideo;Network;Utility;
+Keywords=video;downloader;m3u8;hls;stream;
+StartupNotify=true

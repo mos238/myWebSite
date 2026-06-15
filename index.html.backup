@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mohammed Sayed - YouTube Downloader Tool</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Additional styles for the terminal interface */
+      .terminal-section {
+        margin: 2rem auto;
+        max-width: 800px;
+        background: #1e1e1e;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .terminal-header {
+        background: #2d2d2d;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid #3d3d3d;
+      }
+
+      .terminal-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+
+      .terminal-dot.red {
+        background: #ff5f56;
+      }
+      .terminal-dot.yellow {
+        background: #ffbd2e;
+      }
+      .terminal-dot.green {
+        background: #27c93f;
+      }
+
+      .terminal-title {
+        color: #858585;
+        font-size: 13px;
+        margin-left: 10px;
+        font-family: monospace;
+      }
+
+      .terminal-body {
+        padding: 20px;
+        font-family: "Courier New", monospace;
+        background: #1e1e1e;
+      }
+
+      .command-line {
+        background: #2d2d2d;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .command-text {
+        color: #4ec9b0;
+        font-size: 14px;
+        word-break: break-all;
+        flex: 1;
+      }
+
+      .copy-btn {
+        background: #007acc;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background 0.2s;
+      }
+
+      .copy-btn:hover {
+        background: #005a9e;
+      }
+
+      .copy-btn.copied {
+        background: #27c93f;
+      }
+
+      .instruction-step {
+        background: #252525;
+        padding: 15px;
+        margin: 15px 0;
+        border-left: 3px solid #007acc;
+        border-radius: 4px;
+      }
+
+      .instruction-step h3 {
+        color: #007acc;
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+
+      .warning {
+        background: #fff3cd;
+        color: #856404;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 15px 0;
+        font-family: Arial, sans-serif;
+      }
+
+      .success-badge {
+        background: #27c93f;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        display: inline-block;
+        margin-left: 10px;
+      }
+
+      @media (max-width: 768px) {
+        .command-line {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .command-text {
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="introduction">
+      <h1>Full Stack Developer</h1>
+      <p>Mohammed Sayed</p>
+    </header>
+
+    <main class="profile">
+      <p>Welcome to my website!</p>
+
+      <h2>🔗 Connect with me:</h2>
+      <ul>
+        <li><a href="https://github.com" target="_blank">🐙 GitHub</a></li>
+        <li>
+          <a href="https://www.linkedin.com" target="_blank">🔗 LinkedIn</a>
+        </li>
+        <li>
+          <a href="https://www.portfolio.com" target="_blank">💼 Portfolio</a>
+        </li>
+      </ul>
+
+      <h2>🎥 YouTube Downloader Tool</h2>
+      <p>Download videos from YouTube directly from your terminal!</p>
+
+      <!-- Interactive Terminal Section -->
+      <div class="terminal-section">
+        <div class="terminal-header">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+          <div class="terminal-title">zeus@xps-9320:~/yt-downloader</div>
+        </div>
+        <div class="terminal-body">
+          <div class="instruction-step">
+            <h3>⚡ Quick Run (One Command)</h3>
+            <p>
+              Run this command in your terminal to download videos immediately:
+            </p>
+            <div class="command-line">
+              <code class="command-text"
+                >bash <(curl -s
+                https://raw.githubusercontent.com/mos238/myWebSite/main/dl_ytube.sh)</code
+              >
+              <button
+                class="copy-btn"
+                onclick="
+                  copyCommand(
+                    this,
+                    'bash <(curl -s https://raw.githubusercontent.com/mos238/myWebSite/main/dl_ytube.sh)',
+                  )
+                "
+              >
+                Copy
+              </button>
+            </div>
+            <p>
+              <small>✅ No download needed - runs directly from GitHub</small>
+            </p>
+          </div>
+
+          <div class="instruction-step">
+            <h3>📥 Download & Run (Manual Method)</h3>
+            <p>Prefer to download the script first? Use these commands:</p>
+            <div class="command-line">
+              <code class="command-text"
+                >wget
+                https://raw.githubusercontent.com/mos238/myWebSite/main/dl_ytube.sh</code
+              >
+              <button
+                class="copy-btn"
+                onclick="
+                  copyCommand(
+                    this,
+                    'wget https://raw.githubusercontent.com/mos238/myWebSite/main/dl_ytube.sh',
+                  )
+                "
+              >
+                Copy
+              </button>
+            </div>
+            <div class="command-line">
+              <code class="command-text">chmod +x dl_ytube.sh</code>
+              <button
+                class="copy-btn"
+                onclick="copyCommand(this, 'chmod +x dl_ytube.sh')"
+              >
+                Copy
+              </button>
+            </div>
+            <div class="command-line">
+              <code class="command-text">./dl_ytube.sh</code>
+              <button
+                class="copy-btn"
+                onclick="copyCommand(this, './dl_ytube.sh')"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="instruction-step">
+            <h3>📦 Install Required Dependencies</h3>
+            <p>First time? Make sure you have these installed:</p>
+            <div class="command-line">
+              <code class="command-text">sudo apt install yt-dlp ffmpeg</code>
+              <button
+                class="copy-btn"
+                onclick="copyCommand(this, 'sudo apt install yt-dlp ffmpeg')"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="warning">
+            <strong>⚠️ Note:</strong> This script requires
+            <code>yt-dlp</code> and <code>ffmpeg</code> to be installed on your
+            system. Run the dependency command above first if you haven't
+            already.
+          </div>
+
+          <div class="instruction-step">
+            <h3>🎯 Example Usage</h3>
+            <p>After running the script, you'll be prompted to:</p>
+            <ul style="color: #d4d4d4; margin-left: 20px">
+              <li>📋 Paste a YouTube URL</li>
+              <li>🎨 Choose quality (best, 1080p, 720p, etc.)</li>
+              <li>📁 Select output format (mp4, webm, etc.)</li>
+              <li>💾 Videos save to your current directory</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2>📁 Direct Download</h2>
+      <ul>
+        <li>
+          <a href="dl_ytube.sh" download
+            >💾 Download dl_ytube.sh (Save Locally)</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://raw.githubusercontent.com/mos238/myWebSite/main/dl_ytube.sh"
+            target="_blank"
+            >👁️ View Script Source Code</a
+          >
+        </li>
+      </ul>
+
+      <p>
+        <small>Last updated: <span id="lastUpdated"></span></small>
+      </p>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+      // Auto-update the last updated date
+      document.getElementById("lastUpdated").textContent =
+        new Date().toLocaleString();
+
+      // Copy command function with animation
+      function copyCommand(button, command) {
+        navigator.clipboard
+          .writeText(command)
+          .then(() => {
+            const originalText = button.textContent;
+            button.textContent = "✓ Copied!";
+            button.classList.add("copied");
+
+            setTimeout(() => {
+              button.textContent = originalText;
+              button.classList.remove("copied");
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error("Failed to copy:", err);
+            button.textContent = "Failed!";
+            setTimeout(() => (button.textContent = "Copy"), 2000);
+          });
+      }
+
+      // Add keyboard shortcut (Ctrl+Shift+C to copy first command)
+      document.addEventListener("keydown", (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === "C") {
+          e.preventDefault();
+          const firstCommand = document.querySelector(
+            ".command-line .command-text",
+          );
+          if (firstCommand) {
+            const command = firstCommand.textContent;
+            navigator.clipboard.writeText(command);
+            const btn = document.querySelector(".copy-btn");
+            if (btn) {
+              const originalText = btn.textContent;
+              btn.textContent = "✓ Copied!";
+              setTimeout(() => (btn.textContent = originalText), 2000);
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
+<h2>🎥 NEW: YouTube Downloader Web App</h2>
+<p>Try my new web-based YouTube downloader! No terminal needed.</p>
+<p><a href="http://localhost:5000">Launch YouTube Downloader</a></p>
