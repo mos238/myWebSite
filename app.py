@@ -78,34 +78,60 @@ def download_m3u8():
     if not url:
         return jsonify({'success': False, 'error': 'No URL provided'}), 400
     
-    # Check ffmpeg
-    try:
-        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
-    except:
-        return jsonify({'success': False, 'error': 'ffmpeg not available'}), 500
-    
     filename = f"m3u8_video_{uuid.uuid4().hex[:8]}.mp4"
     filepath = os.path.join(DOWNLOAD_FOLDER, filename)
     
     try:
+        # Build ffmpeg command
         cmd = ['ffmpeg', '-y']
-        if referer:
-            cmd.extend(['-headers', f'Referer: {referer}'])
-        cmd.extend(['-user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'])
-        cmd.extend(['-i', url, '-c', 'copy', '-bsf:a', 'aac_adtstoasc', filepath])
         
+        # Add headers
+        if referer:
+            cmd.extend(['-headers', f'Referer: {referer}\r\n'])
+        
+        cmd.extend([
+            '-user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            '-i', url,
+            '-c', 'copy',
+            '-bsf:a', 'aac_adtstoasc',
+            filepath
+        ])
+        
+        # Run ffmpeg
         process = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
         
-        if process.returncode == 0 and os.path.exists(filepath) and os.path.getsize(filepath) > 0:
-            return send_file(filepath, as_attachment=True, download_name=filename)
+        # Check if download succeeded
+        if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+            file_size = os.path.getsize(filepath) / (1024 * 1024)
+            return send_file(
+                filepath,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='video/mp4'
+            )
         else:
+            # Get the actual error message
             error_msg = process.stderr if process.stderr else "Unknown error"
-            return jsonify({'success': False, 'error': f'Download failed: {error_msg[:200]}'}), 500
+            # Extract useful error from ffmpeg output
+            if "404" in error_msg:
+                error_msg = "Stream not found (404) - URL may be invalid or expired"
+            elif "403" in error_msg:
+                error_msg = "Access forbidden (403) - Try adding the correct Referer URL"
+            elif "Invalid data" in error_msg:
+                error_msg = "Invalid M3U8 stream - URL may be incorrect"
+            else:
+                # Get last line of error
+                lines = error_msg.strip().split('\n')
+                error_msg = lines[-1] if lines else error_msg
+            
+            return jsonify({'success': False, 'error': error_msg}), 500
+            
     except subprocess.TimeoutExpired:
-        return jsonify({'success': False, 'error': 'Download timeout'}), 500
+        return jsonify({'success': False, 'error': 'Download timeout (5 minutes)'}), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
+        # Clean up
         if os.path.exists(filepath):
             try:
                 os.remove(filepath)
@@ -139,9 +165,14 @@ def download_video():
             ydl.download([url])
         
         if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
-            return send_file(filepath, as_attachment=True, download_name=f"youtube_video_{uuid.uuid4().hex[:8]}.mp4")
+            return send_file(
+                filepath,
+                as_attachment=True,
+                download_name=f"youtube_video_{uuid.uuid4().hex[:8]}.mp4",
+                mimetype='video/mp4'
+            )
         else:
-            return jsonify({'success': False, 'error': 'Download failed'}), 500
+            return jsonify({'success': False, 'error': 'Download failed - file not created'}), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
