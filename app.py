@@ -7,27 +7,20 @@ import subprocess
 import re
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for cross-origin requests
+CORS(app)
 
 DOWNLOAD_FOLDER = 'downloads'
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 def clean_youtube_url(url):
-    """Clean YouTube URL by removing extra parameters"""
-    # Handle youtu.be short URLs
     if 'youtu.be' in url:
-        # Extract video ID
         match = re.search(r'youtu\.be/([a-zA-Z0-9_-]+)', url)
         if match:
             video_id = match.group(1)
             return f'https://www.youtube.com/watch?v={video_id}'
-    
-    # Handle youtube.com URLs with extra params
     if 'youtube.com' in url:
-        # Remove tracking parameters
         base_url = re.sub(r'[?&](si|feature|list|index|pp|is)=[^&]*', '', url)
         return base_url
-    
     return url
 
 @app.route('/')
@@ -42,7 +35,6 @@ def get_video_info():
     if not url:
         return jsonify({'success': False, 'error': 'No URL provided'}), 400
     
-    # Clean the URL
     url = clean_youtube_url(url)
     
     try:
@@ -65,7 +57,6 @@ def get_video_info():
                         'filesize': f.get('filesize', 0)
                     })
             
-            # Sort formats by quality (highest first)
             formats.sort(key=lambda x: int(x['quality'].replace('p', '')), reverse=True)
             
             return jsonify({
@@ -73,19 +64,10 @@ def get_video_info():
                 'title': info.get('title', 'Unknown'),
                 'thumbnail': info.get('thumbnail', ''),
                 'duration': info.get('duration', 0),
-                'formats': formats[:10]  # Limit to 10 formats
+                'formats': formats[:10]
             })
     except Exception as e:
-        error_msg = str(e)
-        # Provide user-friendly error messages
-        if 'Video unavailable' in error_msg:
-            error_msg = 'Video is unavailable or private'
-        elif 'Sign in' in error_msg:
-            error_msg = 'Video requires login or is age-restricted'
-        elif 'rate limit' in error_msg.lower():
-            error_msg = 'Rate limited. Please try again later'
-        
-        return jsonify({'success': False, 'error': error_msg}), 400
+        return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/download-m3u8', methods=['POST'])
 def download_m3u8():
@@ -96,31 +78,31 @@ def download_m3u8():
     if not url:
         return jsonify({'success': False, 'error': 'No URL provided'}), 400
     
+    # Check ffmpeg
+    try:
+        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
+    except:
+        return jsonify({'success': False, 'error': 'ffmpeg not available'}), 500
+    
     filename = f"m3u8_video_{uuid.uuid4().hex[:8]}.mp4"
     filepath = os.path.join(DOWNLOAD_FOLDER, filename)
     
     try:
         cmd = ['ffmpeg', '-y']
-        
         if referer:
             cmd.extend(['-headers', f'Referer: {referer}'])
-        
         cmd.extend(['-user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'])
         cmd.extend(['-i', url, '-c', 'copy', '-bsf:a', 'aac_adtstoasc', filepath])
         
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        process = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
         
-        if result.returncode == 0 and os.path.exists(filepath) and os.path.getsize(filepath) > 0:
-            return send_file(
-                filepath,
-                as_attachment=True,
-                download_name=filename
-            )
+        if process.returncode == 0 and os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+            return send_file(filepath, as_attachment=True, download_name=filename)
         else:
-            error_msg = result.stderr if result.stderr else "Unknown error"
+            error_msg = process.stderr if process.stderr else "Unknown error"
             return jsonify({'success': False, 'error': f'Download failed: {error_msg[:200]}'}), 500
     except subprocess.TimeoutExpired:
-        return jsonify({'success': False, 'error': 'Download timeout (5 minutes)'}), 500
+        return jsonify({'success': False, 'error': 'Download timeout'}), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
     finally:
@@ -139,7 +121,6 @@ def download_video():
     if not url:
         return jsonify({'success': False, 'error': 'No URL provided'}), 400
     
-    # Clean the URL
     url = clean_youtube_url(url)
     
     filename = f"{uuid.uuid4().hex}.mp4"
@@ -158,20 +139,11 @@ def download_video():
             ydl.download([url])
         
         if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
-            return send_file(
-                filepath,
-                as_attachment=True,
-                download_name=f"youtube_video_{uuid.uuid4().hex[:8]}.mp4"
-            )
+            return send_file(filepath, as_attachment=True, download_name=f"youtube_video_{uuid.uuid4().hex[:8]}.mp4")
         else:
-            return jsonify({'success': False, 'error': 'Download failed - file not created'}), 500
+            return jsonify({'success': False, 'error': 'Download failed'}), 500
     except Exception as e:
-        error_msg = str(e)
-        if 'Video unavailable' in error_msg:
-            error_msg = 'Video is unavailable or private'
-        elif 'Sign in' in error_msg:
-            error_msg = 'Video requires login or is age-restricted'
-        return jsonify({'success': False, 'error': error_msg}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
     finally:
         if os.path.exists(filepath):
             try:
