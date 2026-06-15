@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Name=Video Downloader (Local)
-Comment=Download videos directly to your PC - fast and efficient
+Comment=Download videos directly to your PC
 Exec=python3 /home/zeus/Documents/projects/CodecademyExamPrep/myWebSite/local_downloader.py
 Icon=video-x-generic
 Terminal=false
