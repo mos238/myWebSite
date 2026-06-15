@@ -31,6 +31,49 @@
             font-size: 11px;
             margin-left: 10px;
         }
+        
+        .back-button {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background: rgba(102,126,234,0.1);
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid #667eea;
+        }
+        
+        .back-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(-5px);
+        }
+        
+        .separator {
+            text-align: center;
+            margin: 40px 0;
+            position: relative;
+        }
+        
+        .separator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+        }
+        
+        .separator span {
+            background: white;
+            padding: 0 20px;
+            position: relative;
+            color: #667eea;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -55,6 +98,13 @@
                     <p style="font-size: 14px;">Full-stack application that lets users download YouTube videos in any quality.</p>
                 </div>
 
+                <!-- Back to Portfolio button after YouTube Downloader -->
+                <div style="margin: 20px 0;">
+                    <a href="https://mos238.github.io/myWebSite/tools.html" class="back-button">
+                        ← Back to Developer Tools
+                    </a>
+                </div>
+
                 <div class="project">
                     <div class="project-title">Portfolio Website</div>
                     <div class="project-tech">HTML5 · CSS3 · JavaScript · GitHub Pages</div>
@@ -75,14 +125,14 @@
                 </div>
             </div>
 
-            <!-- SIDEBAR - Simple tools link -->
+            <!-- SIDEBAR - Tools link -->
             <div class="sidebar">
                 <div class="tools">
                     <h3>🛠️ Developer Tools</h3>
                     <p style="font-size: 14px; margin-bottom: 15px;">Free tools I've built for downloading videos and streams.</p>
-                    <a href="tools.html" class="tools-link">
+                    <a href="https://mos238.github.io/myWebSite/tools.html" class="tools-link">
                         Browse All Tools →
-                        <span class="badge">7 tools</span>
+                        <span class="badge">3 tools</span>
                     </a>
                 </div>
 
@@ -144,4 +194,3 @@
     </script>
 </body>
 </html>
- 
