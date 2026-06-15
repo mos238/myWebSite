@@ -50,34 +50,10 @@
             color: white;
             transform: translateX(-5px);
         }
-        
-        .back-to-portfolio {
-            display: inline-block;
-            margin: 10px 0 20px 0;
-            padding: 8px 16px;
-            background: #48bb78;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .back-to-portfolio:hover {
-            background: #38a169;
-            transform: translateX(-5px);
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Back to Portfolio Button at Top -->
-        <div style="margin-bottom: 20px;">
-            <a href="https://mos238.github.io/myWebSite/tools.html" class="back-to-portfolio">
-                ← Back to Tools
-            </a>
-        </div>
-        
         <div class="two-columns">
             <!-- MAIN CONTENT -->
             <div class="main-content">
@@ -97,15 +73,8 @@
                     <div class="project-tech">Flask · yt-dlp · Python · HTML/CSS</div>
                     <p style="font-size: 14px;">Full-stack application that lets users download YouTube videos in any quality.</p>
                     <div style="margin-top: 15px;">
-                        <a href="https://mywebsite-m9qv.onrender.com" target="_blank" style="display: inline-block; padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px;">Launch Web App →</a>
+                        <a href="https://mywebsite-m9qv.onrender.com" target="_blank" class="tools-link" style="padding: 8px 16px; font-size: 14px;">Launch Web App →</a>
                     </div>
-                </div>
-
-                <!-- Back to Portfolio Button AFTER YouTube Web App Launcher -->
-                <div style="margin: 20px 0 30px 0; text-align: center;">
-                    <a href="https://mos238.github.io/myWebSite/tools.html" class="back-button">
-                        ← Browse All Developer Tools
-                    </a>
                 </div>
 
                 <div class="project">
@@ -169,7 +138,6 @@
 
     <script src="script.js"></script>
     <script>
-        // Contact form handler
         const contactForm = document.getElementById('contactForm');
         const formStatus = document.getElementById('formStatus');
         
