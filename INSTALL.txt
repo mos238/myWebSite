@@ -1,0 +1,39 @@
+========================================
+  Video Downloader - Installation Guide
+========================================
+
+Method 1: One-Click Installer (Easiest)
+----------------------------------------
+Download install_video_downloader.sh and run:
+    bash install_video_downloader.sh
+
+
+Method 2: Manual Install (Terminal)
+------------------------------------
+# Download the Python script
+wget https://raw.githubusercontent.com/mos238/myWebSite/main/local_downloader.py
+
+# Make it executable
+chmod +x local_downloader.py
+
+# Run it
+python3 local_downloader.py
+
+
+Method 3: Install System-Wide
+------------------------------
+# Copy to local bin
+cp local_downloader.py ~/.local/bin/video-downloader
+chmod +x ~/.local/bin/video-downloader
+
+# Then run from anywhere with:
+video-downloader
+
+
+Requirements
+------------
+- Python 3.6+
+- For M3U8 downloads: ffmpeg (sudo apt install ffmpeg)
+- For GUI: python3-tk (sudo apt install python3-tk)
+
+========================================
