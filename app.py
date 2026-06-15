@@ -3,7 +3,6 @@ from flask_cors import CORS
 import yt_dlp
 import os
 import uuid
-import subprocess
 import re
 
 app = Flask(__name__)
@@ -13,14 +12,23 @@ DOWNLOAD_FOLDER = 'downloads'
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 def clean_youtube_url(url):
+    """Clean YouTube URL by removing tracking parameters and handling short URLs"""
+    url = url.strip()
+    
+    # Handle youtu.be short URLs
     if 'youtu.be' in url:
         match = re.search(r'youtu\.be/([a-zA-Z0-9_-]+)', url)
         if match:
             video_id = match.group(1)
             return f'https://www.youtube.com/watch?v={video_id}'
-    if 'youtube.com' in url:
-        base_url = re.sub(r'[?&](si|feature|list|index|pp|is)=[^&]*', '', url)
-        return base_url
+    
+    # Handle youtube.com URLs with extra params
+    if 'youtube.com' in url or 'youtu.be' in url:
+        # Remove tracking parameters
+        url = re.sub(r'[?&](si|feature|list|index|pp|is|emb|utm)[=][^&]*', '', url)
+        # Remove trailing '&' or '?'
+        url = re.sub(r'[?&]$', '', url)
+    
     return url
 
 @app.route('/')
@@ -35,18 +43,26 @@ def get_video_info():
     if not url:
         return jsonify({'success': False, 'error': 'No URL provided'}), 400
     
+    # Clean the URL
     url = clean_youtube_url(url)
+    print(f"Fetching info for: {url}")
     
     try:
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'cookiefile': None,
+            'nocheckcertificate': True,
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
+            
+            if not info:
+                return jsonify({'success': False, 'error': 'Could not fetch video info'}), 400
+            
             formats = []
             for f in info.get('formats', []):
                 if f.get('height') and f.get('ext') in ['mp4', 'webm']:
@@ -57,6 +73,7 @@ def get_video_info():
                         'filesize': f.get('filesize', 0)
                     })
             
+            # Sort by quality (highest first)
             formats.sort(key=lambda x: int(x['quality'].replace('p', '')), reverse=True)
             
             return jsonify({
@@ -64,79 +81,26 @@ def get_video_info():
                 'title': info.get('title', 'Unknown'),
                 'thumbnail': info.get('thumbnail', ''),
                 'duration': info.get('duration', 0),
-                'formats': formats[:10]
+                'formats': formats[:10]  # Limit to 10 formats
             })
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 400
-
-@app.route('/download-m3u8', methods=['POST'])
-def download_m3u8():
-    data = request.json
-    url = data.get('url')
-    referer = data.get('referer', '')
-    
-    if not url:
-        return jsonify({'success': False, 'error': 'No URL provided'}), 400
-    
-    filename = f"m3u8_video_{uuid.uuid4().hex[:8]}.mp4"
-    filepath = os.path.join(DOWNLOAD_FOLDER, filename)
-    
-    try:
-        # Build ffmpeg command
-        cmd = ['ffmpeg', '-y']
-        
-        # Add headers
-        if referer:
-            cmd.extend(['-headers', f'Referer: {referer}\r\n'])
-        
-        cmd.extend([
-            '-user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            '-i', url,
-            '-c', 'copy',
-            '-bsf:a', 'aac_adtstoasc',
-            filepath
-        ])
-        
-        # Run ffmpeg
-        process = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-        
-        # Check if download succeeded
-        if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
-            file_size = os.path.getsize(filepath) / (1024 * 1024)
-            return send_file(
-                filepath,
-                as_attachment=True,
-                download_name=filename,
-                mimetype='video/mp4'
-            )
-        else:
-            # Get the actual error message
-            error_msg = process.stderr if process.stderr else "Unknown error"
-            # Extract useful error from ffmpeg output
-            if "404" in error_msg:
-                error_msg = "Stream not found (404) - URL may be invalid or expired"
-            elif "403" in error_msg:
-                error_msg = "Access forbidden (403) - Try adding the correct Referer URL"
-            elif "Invalid data" in error_msg:
-                error_msg = "Invalid M3U8 stream - URL may be incorrect"
-            else:
-                # Get last line of error
-                lines = error_msg.strip().split('\n')
-                error_msg = lines[-1] if lines else error_msg
             
-            return jsonify({'success': False, 'error': error_msg}), 500
-            
-    except subprocess.TimeoutExpired:
-        return jsonify({'success': False, 'error': 'Download timeout (5 minutes)'}), 500
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-    finally:
-        # Clean up
-        if os.path.exists(filepath):
-            try:
-                os.remove(filepath)
-            except:
-                pass
+        error_msg = str(e)
+        print(f"Error: {error_msg}")
+        
+        # User-friendly error messages
+        if 'Video unavailable' in error_msg:
+            error_msg = 'Video is unavailable or private'
+        elif 'Sign in' in error_msg:
+            error_msg = 'Video requires login or is age-restricted'
+        elif 'rate limit' in error_msg.lower():
+            error_msg = 'Rate limited. Please try again later'
+        elif '404' in error_msg:
+            error_msg = 'Video not found. Check the URL'
+        elif 'HTTP Error 400' in error_msg:
+            error_msg = 'Invalid URL format'
+        
+        return jsonify({'success': False, 'error': error_msg}), 400
 
 @app.route('/download', methods=['POST'])
 def download_video():
@@ -147,7 +111,9 @@ def download_video():
     if not url:
         return jsonify({'success': False, 'error': 'No URL provided'}), 400
     
+    # Clean the URL
     url = clean_youtube_url(url)
+    print(f"Downloading: {url}")
     
     filename = f"{uuid.uuid4().hex}.mp4"
     filepath = os.path.join(DOWNLOAD_FOLDER, filename)
@@ -158,7 +124,9 @@ def download_video():
             'outtmpl': filepath,
             'quiet': True,
             'no_warnings': True,
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'cookiefile': None,
+            'nocheckcertificate': True,
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -173,8 +141,11 @@ def download_video():
             )
         else:
             return jsonify({'success': False, 'error': 'Download failed - file not created'}), 500
+            
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        error_msg = str(e)
+        print(f"Download error: {error_msg}")
+        return jsonify({'success': False, 'error': error_msg}), 500
     finally:
         if os.path.exists(filepath):
             try:
