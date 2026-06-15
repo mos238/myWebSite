@@ -100,13 +100,18 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .url-input {
+        .url-input, .referer-input {
             width: 100%;
-            padding: 15px;
-            font-size: 16px;
+            padding: 12px;
+            font-size: 14px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .url-input:focus, .referer-input:focus {
+            outline: none;
+            border-color: #667eea;
         }
         
         .fetch-btn {
@@ -178,6 +183,13 @@
             display: none;
         }
         
+        .info-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        
         .footer-note {
             text-align: center;
             margin-top: 30px;
@@ -217,6 +229,8 @@
         <!-- M3U8 Tab -->
         <div id="m3u8" class="tab-content">
             <input type="text" id="m3u8Url" class="url-input" placeholder="https://example.com/stream.m3u8" />
+            <input type="text" id="refererUrl" class="referer-input" placeholder="Referer URL (optional - for protected streams)" />
+            <div class="info-text">💡 Some streams need a Referer URL. Copy the webpage URL where you found the stream.</div>
             <button onclick="downloadM3U8()" class="fetch-btn">Download M3U8 Stream</button>
             
             <div class="loading" id="m3u8Loading">
@@ -308,6 +322,8 @@
         
         async function downloadM3U8() {
             const url = document.getElementById('m3u8Url').value;
+            const referer = document.getElementById('refererUrl').value;
+            
             if (!url) {
                 showError('m3u8Error', 'Please enter an M3U8 URL');
                 return;
@@ -320,7 +336,7 @@
                 const response = await fetch('/download-m3u8', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({url: url})
+                    body: JSON.stringify({url: url, referer: referer})
                 });
                 
                 if (response.ok) {
@@ -331,8 +347,11 @@
                     a.download = 'video.mp4';
                     a.click();
                     window.URL.revokeObjectURL(downloadUrl);
+                    showError('m3u8Error', 'Download started! Check your downloads folder.');
+                    setTimeout(() => hideError('m3u8Error'), 3000);
                 } else {
-                    showError('m3u8Error', 'Download failed. Please check the URL.');
+                    const error = await response.json();
+                    showError('m3u8Error', error.error || 'Download failed. Please check the URL.');
                 }
             } catch (error) {
                 showError('m3u8Error', 'Network error. Please try again.');
