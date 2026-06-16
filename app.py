@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, jsonify
+from flask import Flask, render_template, request, send_file, jsonify, session
 from flask_cors import CORS
 import yt_dlp
 import os
@@ -6,16 +6,12 @@ import uuid
 import re
 import ssl
 import certifi
-import urllib3
+from werkzeug.utils import secure_filename
 
-# Fix SSL certificate issues
+# SSL certificate fix
 os.environ['SSL_CERT_FILE'] = certifi.where()
 os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
 
-# Disable SSL warnings (optional, but helpful)
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-# Create unverified SSL context as fallback
 try:
     _create_unverified_https_context = ssl._create_unverified_context
 except AttributeError:
@@ -24,32 +20,103 @@ else:
     ssl._create_default_https_context = _create_unverified_https_context
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 CORS(app)
 
 DOWNLOAD_FOLDER = 'downloads'
+COOKIE_FOLDER = 'cookies'
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
+os.makedirs(COOKIE_FOLDER, exist_ok=True)
+
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max for cookie file
 
 def clean_youtube_url(url):
     """Clean YouTube URL by removing tracking parameters"""
     url = url.strip()
     
-    # Handle youtu.be short URLs
     if 'youtu.be' in url:
         match = re.search(r'youtu\.be/([a-zA-Z0-9_-]+)', url)
         if match:
             video_id = match.group(1)
             return f'https://www.youtube.com/watch?v={video_id}'
     
-    # Remove tracking parameters
     if 'youtube.com' in url:
         url = re.sub(r'[?&](si|feature|list|index|pp|is|emb|utm|ab_channel)=[^&]*', '', url)
         url = re.sub(r'[?&]$', '', url)
     
     return url
 
+def get_cookie_path():
+    """Get the path to the current cookie file"""
+    cookie_file = session.get('cookie_file', '')
+    if cookie_file and os.path.exists(cookie_file):
+        return cookie_file
+    return None
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/upload-cookie', methods=['POST'])
+def upload_cookie():
+    """Upload a cookies.txt file"""
+    try:
+        if 'cookie_file' not in request.files:
+            return jsonify({'success': False, 'error': 'No file uploaded'}), 400
+        
+        file = request.files['cookie_file']
+        if file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'}), 400
+        
+        if not file.filename.endswith('.txt'):
+            return jsonify({'success': False, 'error': 'File must be .txt format'}), 400
+        
+        # Save the cookie file
+        filename = secure_filename(f"cookies_{uuid.uuid4().hex[:8]}.txt")
+        filepath = os.path.join(COOKIE_FOLDER, filename)
+        file.save(filepath)
+        
+        # Store in session
+        session['cookie_file'] = filepath
+        
+        # Read first few lines to verify
+        with open(filepath, 'r') as f:
+            first_lines = f.readlines()[:5]
+        
+        return jsonify({
+            'success': True,
+            'message': 'Cookie file uploaded successfully!',
+            'filename': filename,
+            'preview': first_lines
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/clear-cookie', methods=['POST'])
+def clear_cookie():
+    """Clear the current cookie file"""
+    try:
+        cookie_file = session.get('cookie_file')
+        if cookie_file and os.path.exists(cookie_file):
+            os.remove(cookie_file)
+        session.pop('cookie_file', None)
+        return jsonify({'success': True, 'message': 'Cookie file cleared'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/get-cookie-status', methods=['GET'])
+def get_cookie_status():
+    """Get the status of the current cookie file"""
+    cookie_file = session.get('cookie_file')
+    if cookie_file and os.path.exists(cookie_file):
+        size = os.path.getsize(cookie_file)
+        return jsonify({
+            'has_cookie': True,
+            'size': size,
+            'size_mb': f"{size / 1024 / 1024:.2f} MB"
+        })
+    return jsonify({'has_cookie': False})
 
 @app.route('/get-info', methods=['POST'])
 def get_video_info():
@@ -62,6 +129,10 @@ def get_video_info():
     url = clean_youtube_url(url)
     print(f"🎬 Fetching info for: {url}")
     
+    # Get cookie file from session
+    cookie_file = get_cookie_path()
+    print(f"🍪 Using cookie: {cookie_file}")
+    
     try:
         ydl_opts = {
             'quiet': True,
@@ -71,13 +142,11 @@ def get_video_info():
             'nocheckcertificate': True,
             'ignoreerrors': True,
             'geo_bypass': True,
-            # Add these to bypass SSL issues
-            'cookiefile': None,
+            'cookiefile': cookie_file if cookie_file else None,
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'Accept-Language': 'en-us,en;q=0.5',
-                'Sec-Fetch-Mode': 'navigate',
             }
         }
         
@@ -111,9 +180,8 @@ def get_video_info():
         error_msg = str(e)
         print(f"❌ Error: {error_msg}")
         
-        # User-friendly error messages
-        if 'certificate' in error_msg.lower():
-            error_msg = 'SSL certificate issue. Please try again or use the Local Video Downloader.'
+        if 'certificate' in error_msg.lower() or 'SSL' in error_msg:
+            error_msg = 'SSL certificate issue. Please upload a cookies.txt file or use the Local Video Downloader.'
         elif 'Video unavailable' in error_msg:
             error_msg = 'Video is unavailable or private'
         elif 'Sign in' in error_msg:
@@ -137,6 +205,9 @@ def download_video():
     url = clean_youtube_url(url)
     print(f"⬇️ Downloading: {url}")
     
+    cookie_file = get_cookie_path()
+    print(f"🍪 Using cookie: {cookie_file}")
+    
     filename = f"{uuid.uuid4().hex}.mp4"
     filepath = os.path.join(DOWNLOAD_FOLDER, filename)
     
@@ -150,12 +221,11 @@ def download_video():
             'nocheckcertificate': True,
             'ignoreerrors': True,
             'geo_bypass': True,
-            'cookiefile': None,
+            'cookiefile': cookie_file if cookie_file else None,
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'Accept-Language': 'en-us,en;q=0.5',
-                'Sec-Fetch-Mode': 'navigate',
             }
         }
         
