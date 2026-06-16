@@ -4,6 +4,24 @@ import yt_dlp
 import os
 import uuid
 import re
+import ssl
+import certifi
+import urllib3
+
+# Fix SSL certificate issues
+os.environ['SSL_CERT_FILE'] = certifi.where()
+os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
+
+# Disable SSL warnings (optional, but helpful)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Create unverified SSL context as fallback
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
 
 app = Flask(__name__)
 CORS(app)
@@ -12,7 +30,7 @@ DOWNLOAD_FOLDER = 'downloads'
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 def clean_youtube_url(url):
-    """Clean YouTube URL by removing tracking parameters and handling short URLs"""
+    """Clean YouTube URL by removing tracking parameters"""
     url = url.strip()
     
     # Handle youtu.be short URLs
@@ -22,11 +40,9 @@ def clean_youtube_url(url):
             video_id = match.group(1)
             return f'https://www.youtube.com/watch?v={video_id}'
     
-    # Handle youtube.com URLs with extra params
+    # Remove tracking parameters
     if 'youtube.com' in url:
-        # Remove tracking parameters
         url = re.sub(r'[?&](si|feature|list|index|pp|is|emb|utm|ab_channel)=[^&]*', '', url)
-        # Remove trailing '&' or '?'
         url = re.sub(r'[?&]$', '', url)
     
     return url
@@ -37,7 +53,6 @@ def index():
 
 @app.route('/get-info', methods=['POST'])
 def get_video_info():
-    """Get YouTube video information using yt-dlp"""
     data = request.json
     url = data.get('url')
     
@@ -54,6 +69,16 @@ def get_video_info():
             'extract_flat': False,
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'nocheckcertificate': True,
+            'ignoreerrors': True,
+            'geo_bypass': True,
+            # Add these to bypass SSL issues
+            'cookiefile': None,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-us,en;q=0.5',
+                'Sec-Fetch-Mode': 'navigate',
+            }
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -72,7 +97,6 @@ def get_video_info():
                         'filesize': f.get('filesize', 0)
                     })
             
-            # Sort by quality (highest first)
             formats.sort(key=lambda x: int(x['quality'].replace('p', '')), reverse=True)
             
             return jsonify({
@@ -88,20 +112,21 @@ def get_video_info():
         print(f"❌ Error: {error_msg}")
         
         # User-friendly error messages
-        if 'Video unavailable' in error_msg:
+        if 'certificate' in error_msg.lower():
+            error_msg = 'SSL certificate issue. Please try again or use the Local Video Downloader.'
+        elif 'Video unavailable' in error_msg:
             error_msg = 'Video is unavailable or private'
         elif 'Sign in' in error_msg:
             error_msg = 'Video requires login or is age-restricted'
         elif 'rate limit' in error_msg.lower():
             error_msg = 'Rate limited. Please try again later'
-        elif '404' in error_msg:
-            error_msg = 'Video not found. Check the URL'
+        else:
+            error_msg = 'Unable to fetch video. Please check the URL and try again.'
         
         return jsonify({'success': False, 'error': error_msg}), 400
 
 @app.route('/download', methods=['POST'])
 def download_video():
-    """Download YouTube video using yt-dlp"""
     data = request.json
     url = data.get('url')
     format_id = data.get('format_id')
@@ -123,6 +148,15 @@ def download_video():
             'no_warnings': True,
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'nocheckcertificate': True,
+            'ignoreerrors': True,
+            'geo_bypass': True,
+            'cookiefile': None,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-us,en;q=0.5',
+                'Sec-Fetch-Mode': 'navigate',
+            }
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
